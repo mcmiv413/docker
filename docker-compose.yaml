@@ -1,0 +1,86 @@
+version: '2'
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy:latest
+    container_name: nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    ports:
+      - 8081:80
+    restart: always
+  sabnzbd:
+    image: linuxserver/sabnzbd:latest
+    container_name: sabnzbd
+    volumes:
+      - n/nfs/nas/config:/config
+      - /nfs/nas/downloads/complete:/downloads
+      - /nfs/nas/downloads/incomplete:/incomplete-downloads
+    ports:
+      - 8080:8080
+    env_file: uidgid.env
+    environment:
+      - EDGE=1
+      - VIRTUAL_HOST=sabnzbd.69.119.148.224.nip.io
+      - VIRTUAL_PORT=8080
+    restart: always
+
+  sonarr:
+    image: linuxserver/sonarr
+    container_name: sonarr
+    volumes:
+      - /nfs/nas/config/sonarr:/config
+      - /nfs/nas/media/tv:/tv
+      - /nfs/nas/downloads/complete:/downloads
+    ports:
+      - 8989:8989
+    env_file: uidgid.env
+    environment:
+      - TZ=America/New_York
+      - VIRTUAL_HOST=sonarr.69.119.148.224.nip.io
+      - VIRTUAL_PORT=8989
+    restart: always
+    
+  radarr:
+    image: linuxserver/radarr
+    container_name: radarr
+    volumes:
+      - /nfs/nas/config/radarr:/config
+      - /nfs/nas/media/movies:/movies
+      - /nfs/nas/downloads/complete:/downloads
+    ports:
+      - 7878:7878
+    env_file: uidgid.env
+    environment:
+      - TZ=America/New_York
+      - VIRTUAL_HOST=radarr.69.119.148.224.nip.io
+      - VIRTUAL_PORT=7878
+    restart: always
+
+  hydra2:
+     image: linuxserver/hydra2
+     container_name: hydra2
+     volumes:
+       - /nfs/nas/config/nzbhydra:/config
+       - /nfs/nas/downloads/complete:/downloads
+     ports:
+       - 5076:5076
+     env_file: uidgid.env
+     environment:
+       - TZ=America/New_York
+       - VIRTUAL_HOST=hydra2.69.119.148.224.nip.io
+       - VIRTUAL_PORT=5075
+     restart: always
+
+  muximux:
+    image: linuxserver/muximux
+    container_name: muximux
+    volumes:
+      - /nfs/nas/config/muximux:/config
+      - /etc/localtime:/etc/localtime:ro
+    env_file: uidgid.env
+    ports:
+      - 8082:8082
+    environment:
+      - VIRTUAL_HOST=mux.69.119.148.224.nip.io
+      - VIRTUAL_PORT=8082
+    restart: always
